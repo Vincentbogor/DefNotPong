@@ -1,12 +1,16 @@
 import pygame
 pygame.init()
+pygame.font.init()
+font1 = pygame.font.SysFont('Comic Sans MS', 50)
+LOSE1 = font1.render('P1, You lose!', True, (255, 0, 0))
+LOSE2 = font1.render('P2, You lose!', True, (0, 0, 255))
 
 scene_len = 640
 scene_hei = 360
 scene_title = 'Legally distinct Pong'
 
 bg_pic = 'galaxy.jpg'
-ball_pic = 'JA Meme.png'
+ball_pic = 'JA Meme.jpg'
 paddle_pic = 'paddle.png'
 bgm = '554382_Machine-Forest.ogg'
 
@@ -52,6 +56,9 @@ class Player(GameSprite):
             
 p1 = Player(paddle_pic, 10, 10, 50, 100, 20)
 p2 = Player(paddle_pic, scene_len-60, 10, 50, 100, 20)
+ball = GameSprite(ball_pic, scene_len/2, scene_hei/2, 50, 50, 5)
+ball_sped_x = ball.speed
+ball_sped_y = ball.speed
 
 while GAME_RUN:
     for event in pygame.event.get():
@@ -62,8 +69,24 @@ while GAME_RUN:
         scene.blit(back, (0, 0))
         p1.reset()
         p2.reset()
+        ball.reset()
         p1.update_p1()
         p2.update_p2()
+        
+        ball.rect.x += ball_sped_x
+        ball.rect.y += ball_sped_y
+        if ball.rect.y < 0 or ball.rect.y > scene_hei-ball.hei:
+            ball_sped_y *= -1
+        
+        if pygame.sprite.collide_rect(p1, ball) or pygame.sprite.collide_rect(p2, ball):
+            ball_sped_x *= -1
+            
+        if ball.rect.x < 0-ball.len or ball.rect.x > scene_len:
+            if ball.rect.x < 0:
+                scene.blit(LOSE1, (40, 150))
+            else:
+                scene.blit(LOSE2, (300, 150))
+            GAME_FINISH = True
         
     FPS.tick(60)
     pygame.display.update()
